@@ -181,7 +181,9 @@ with tab1:
                     is_placed = prob > 0.5
                     
                     if is_placed and reg_pipe is not None:
-                        salario_pred = reg_pipe.predict(input_data)[0]
+                        salario_pred_lpa = reg_pipe.predict(input_data)[0]
+                        # Factor de conversión: 1 LPA ≈ 1,200 USD (Anual)
+                        salario_pred = salario_pred_lpa * 1200
                         min_sal = salario_pred * 0.85
                         max_sal = salario_pred * 1.15
                     else:
@@ -217,9 +219,9 @@ with tab1:
                 if is_placed:
                     st.markdown(f"""
                     <div class='metric-card' style='margin-top: 30px;'>
-                        <div class='metric-label'>Rango Esperado (LPA)</div>
-                        <div class='metric-value'>{min_sal:.1f} - {max_sal:.1f}</div>
-                        <div style='color: #a0aec0; margin-top: 10px;'>Promedio estimado: {salario_pred:.1f} LPA</div>
+                        <div class='metric-label'>Rango Esperado (USD Anual)</div>
+                        <div class='metric-value'>${min_sal:,.0f} - ${max_sal:,.0f}</div>
+                        <div style='color: #a0aec0; margin-top: 10px;'>Promedio estimado: ${salario_pred:,.0f} USD</div>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
