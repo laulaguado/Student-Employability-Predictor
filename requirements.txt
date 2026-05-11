@@ -3,12 +3,8 @@ numpy<1.26.0
 scikit-learn
 matplotlib
 seaborn
+plotly
 imbalanced-learn
 lightgbm
-streamlit
-scipy
-statsmodels
-ydata-profiling
-optuna
-plotly
 joblib
+streamlit
