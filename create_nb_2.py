@@ -491,6 +491,57 @@ def create_notebook():
                 "joblib.dump(reg_pipeline, 'pipeline_salary.pkl')\n",
                 "print(\"Pipeline de regresión salarial guardado como 'pipeline_salary.pkl'.\")"
             ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### 6. Interpretabilidad (Feature Importance)\n",
+                "Analizamos qué variables son las más influyentes para el modelo final."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import matplotlib.pyplot as plt\n",
+                "import seaborn as sns\n",
+                "\n",
+                "# 1. Obtener nombres de columnas procesadas\n",
+                "cat_encoder = production_pipeline.named_steps['preprocessor'].named_transformers_['cat']\n",
+                "cat_features_encoded = cat_encoder.get_feature_names_out(cat_features).tolist()\n",
+                "feature_names = num_features + cat_features_encoded\n",
+                "\n",
+                "# 2. Obtener importancias según el tipo de modelo\n",
+                "clf = production_pipeline.named_steps['classifier']\n",
+                "\n",
+                "# Si el clasificador es a su vez un Pipeline (común en Logistic Regression con Scaler), extraemos el modelo final\n",
+                "if hasattr(clf, 'steps'):\n",
+                "    clf_final = clf.steps[-1][1]\n",
+                "else:\n",
+                "    clf_final = clf\n",
+                "\n",
+                "if hasattr(clf_final, 'feature_importances_'):\n",
+                "    importances = clf_final.feature_importances_\n",
+                "elif hasattr(clf_final, 'coef_'):\n",
+                "    importances = np.abs(clf_final.coef_[0])\n",
+                "else:\n",
+                "    importances = None\n",
+                "\n",
+                "if importances is not None:\n",
+                "    feat_imp = pd.DataFrame({'Feature': feature_names, 'Importance': importances})\n",
+                "    feat_imp = feat_imp.sort_values(by='Importance', ascending=False).head(15)\n",
+                "\n",
+                "    plt.figure(figsize=(10, 6))\n",
+                "    sns.barplot(data=feat_imp, x='Importance', y='Feature', palette='viridis')\n",
+                "    plt.title(f'Top 15 Features más influyentes ({best_model_name})')\n",
+                "    plt.grid(axis='x', linestyle='--', alpha=0.7)\n",
+                "    plt.show()\n",
+                "else:\n",
+                "    print(f\"El modelo {best_model_name} no soporta extracción directa de importancia de variables.\")"
+            ]
         }
     ]
     
